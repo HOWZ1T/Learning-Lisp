@@ -1,18 +1,21 @@
 (defpackage utils
   (:use :cl)
-  (:export :list-glob))
+  (:export :print-globs))
 (in-package :utils)
 
-(defvar funcs ())
-  (defvar vars ())
+(defun print-globs ()
+  (defvar funcs nil)
+  (defvar vars nil)
   (do-external-symbols (s "SB-EXT")
     (when (fboundp s)
-      (append (format t "~S | ~%" s) funcs))
+      (push s funcs))
     (when (boundp s)
-      (append (format t "~S | ~%" s) vars)))
-  ("functions: \n")
-  (loop for func in funcs do (format t "~%" func))
-  ("variables: \n")
-  (loop for var in vars do (format t "~%" var)))
-
-(defun list-glob ())
+      (push s vars)))
+  (format t "FUNCTIONS:~%")
+  (format t "----------------------------------")
+  (loop for fn in funcs do
+       (print fn))
+  (format t "~%~%VARIABLES:~%")
+  (format t "----------------------------------")
+  (loop for vr in vars do
+       (print vr)))

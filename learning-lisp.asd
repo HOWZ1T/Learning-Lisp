@@ -1,15 +1,21 @@
 (defsystem "learning-lisp"
-  :version "0.1.0"
-  :author ""
-  :license ""
+  :version "0.0.1"
+  :author "HOWZ1T@github.com"
+  :license "GNU GPLv3"
   :depends-on ()
   :components ((:module "src"
                 :components
-                ((:file "main"))))
+                ((:file "main")
+		 (:module "db"
+		  :components
+		  ((:file "db")))
+		 (:module "utils"
+		  :components
+		  ((:file "general"))))))
   :description ""
   :long-description
   #.(read-file-string
-     (subpathname *load-pathname* "README.markdown"))
+     (subpathname *load-pathname* "README.md"))
   :in-order-to ((test-op (test-op "learning-lisp/tests"))))
 
 (defsystem "learning-lisp/tests"
