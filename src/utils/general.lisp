@@ -4,33 +4,49 @@
   (:export :print-globs))
 (in-package :utils)
 
+;;; get-globs returns 3 values that being a sorted list of symbols and the largest word size
+;;; return form -> (funcs: funcs vars: vars word-size: word-size)
+(defun get-globs ()
+  (let ((funcs nil) (vars nil) (word-size 0))
+    (do-external-symbols (s "SB-EXT")
+      (let (sym-str sym-size)
+	(setf sym-str (symbol-name s))
+	(setf sym-size (length sym-str))
+	(if (> sym-size word-size) (setf word-size sym-size))
+	(when (fboundp s)
+	  (push sym-str funcs)
+	  )
+	(when (boundp s)
+	  (push sym-str vars)
+	  )
+	)
+      )
+    (list :funcs (sort funcs #'string-lessp) :vars (sort vars #'string-lessp) :word-size word-size))
+  )
+
 ;;; print-globs will print out everything in SBCL's global scope
+;;; returns -> nil
 (defun print-globs ()
-  (defparameter funcs nil)
-  (defparameter vars nil)
-  (defparameter word_size 0)
-  (do-external-symbols (s "SB-EXT")
-    (defparameter sym_str (symbol-name s)) ; getting the symbol name as a string
-    (defparameter sym_size (length sym_str)) ; getting the length of the symbol's name
-    (if (> sym_size word_size) (setf word_size sym_size)) ; getting the longest symbol name
-    (when (fboundp s) ; executes when the symbol a function (aka function bound)
-      (push sym_str funcs))
-    (when (boundp s) ; executes when the symbol is a variable
-      (push sym_str vars)))
-  ;; sorting lists
-  (sort funcs #'string-lessp)
-  (sort vars #'string-lessp)
-  ;; outputting to stdout
-  ;; see: https://codereview.stackexchange.com/questions/48580/creating-a-repetitive-string-in-common-lisp
-  ;; for explanation of format string
-  (format t "~%~v@{~A~:*~}" word_size "*")
-  (format t "~%~v@{~A~:*~}FUNCTIONS~%" (- (/ word_size 2) (/ 9 2)) " ")
-  (format t "~v@{~A~:*~}" word_size "*")
-  (loop for fn in funcs do
-       (print (find-symbol fn)))
-  (format t "~%~%~v@{~A~:*~}" word_size "*")
-  (format t "~%~v@{~A~:*~}VARIABLES~%" (- (/ word_size 2) (/ 9 2)) " ")
-  (format t "~v@{~A~:*~}" word_size "*")
-  (loop for vr in vars do
-    (print (find-symbol vr)))
+  (let (raw-list funcs vars word-size)
+    (setf raw-list (get-globs))
+    (setf funcs (getf raw-list :funcs))
+    (setf vars (getf raw-list :vars))
+    (setf word-size (getf raw-list :word-size))
+    ;; outputting to stdout
+    ;; see: https://codereview.stackexchange.com/questions/48580/creating-a-repetitive-string-in-common-lisp
+    ;; for explanation of format string
+    ;; printing out global functions
+    (format t "~%~v@{~A~:*~}" word-size "*")
+    (format t "~%~v@{~A~:*~}FUNCTIONS~%" (- (/ word-size 2) (/ 9 2)) " ")
+    (format t "~v@{~A~:*~}" word-size "*")
+    (loop for fn in funcs do
+	 (print (find-symbol fn)))
+
+    ;; printing out global variables
+    (format t "~%~%~v@{~A~:*~}" word-size "*")
+    (format t "~%~v@{~A~:*~}VARIABLES~%" (- (/ word-size 2) (/ 9 2)) " ")
+    (format t "~v@{~A~:*~}" word-size "*")
+    (loop for vr in vars do
+	 (print (find-symbol vr)))
+    )
   )
