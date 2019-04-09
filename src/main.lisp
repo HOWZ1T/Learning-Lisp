@@ -2,4 +2,4 @@
   (:use :cl))
 (in-package :learning-lisp)
 
-;; blah blah blah.
+;; TODO
