@@ -4,12 +4,12 @@
   :license "GNU GPLv3"
   :depends-on ()
   :components ((:module "src"
-			:components ((:module "utils"
-					      :components ((:file "general")))
-				     (:module "db"
-					      :depends-on ("utils")
-					      :components ((:file "db")))
-				     (:file "main"))))
+		:components ((:module "utils"
+				      :components ((:file "general")))
+			      (:module "db"
+				       :depends-on ("utils")
+				       :components ((:file "db")))
+			      (:file "main"))))
   :description "A project playground for learning lisp"
   :long-description
   #.(read-file-string
