@@ -1,8 +1,11 @@
 ;;;; This package has general utility functions for doing helpful things in lisp
 (defpackage utils
   (:use :cl)
-  (:export :print-globs))
+  (:export :print-globs :input))
 (in-package :utils)
+
+
+;;; PRIVATE FUNCTIONS BELOW
 
 
 ;;; get-globs returns 3 values that being a sorted list of symbols and the largest word size
@@ -47,6 +50,9 @@
   (format t "~%~v@{~A~:*~}" width "*"))
 
 
+;;; PUBLIC FUNCTIONS BELOW
+
+
 ;;; print-globs will print out all externel symbols of the specified package
 ;;; PARAMETERS:
 ;;;     pkg - the package you're getting the globals for (e.g "SB-EXT")
@@ -58,11 +64,14 @@
   (let (raw-list
 	funcs
 	vars
-	word-size)
+	word-size
+	(min-size 21))
     (setf raw-list (get-globs pkg))
     (setf funcs (getf raw-list :funcs))
     (setf vars (getf raw-list :vars))
     (setf word-size (getf raw-list :word-size))
+    (if (< word-size min-size)
+	(setf word-size min-size))
     
     ;; outputting to stdout
     ;; printing out global functions
@@ -87,3 +96,14 @@
 	(progn
 	  (format t "~%")
 	  (princ "NO EXTERNAL VARIABLES")))) nil) 
+
+
+;;; input - prompts the user for input
+;;; PARAMETERS:
+;;;     prompt - the prompt displayed to the user
+;;; RETURN:
+;;;     string - the input from the user as a string
+(defun input (prompt)
+  (format *query-io* "~a: " prompt)
+  (force-output *query-io*) ;; ensuring that lisp doesn't wait for a newline before printing the prompt
+  (read-line *query-io*))
